@@ -1,0 +1,119 @@
+{
+  "version": "1.0",
+  "name": "Login Flow",
+  "baseUrl": "https://your-app.example.com",
+  "rootNodeId": "6e8aaba8-30d4-40cc-a39b-55302bf83ec1",
+  "nodes": {
+    "6e8aaba8-30d4-40cc-a39b-55302bf83ec1": {
+      "id": "6e8aaba8-30d4-40cc-a39b-55302bf83ec1",
+      "type": "visit",
+      "params": {
+        "url": "/login"
+      },
+      "position": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "49dd8e45-dd45-4121-9fd2-00930a06bd83": {
+      "id": "49dd8e45-dd45-4121-9fd2-00930a06bd83",
+      "type": "type",
+      "params": {
+        "selector": "username",
+        "selectorType": "data-cy",
+        "text": "admin",
+        "clearFirst": true
+      },
+      "position": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "1059d03c-32a6-49a5-9b11-d113d9ebcceb": {
+      "id": "1059d03c-32a6-49a5-9b11-d113d9ebcceb",
+      "type": "type",
+      "params": {
+        "selector": "password",
+        "selectorType": "data-cy",
+        "text": "password123",
+        "clearFirst": true
+      },
+      "position": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "0a59a629-49a2-41f7-9951-a7c32a457217": {
+      "id": "0a59a629-49a2-41f7-9951-a7c32a457217",
+      "type": "click",
+      "params": {
+        "selector": "login-btn",
+        "selectorType": "data-cy"
+      },
+      "position": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "7d888ae0-e054-41ad-b754-a4915b1180b9": {
+      "id": "7d888ae0-e054-41ad-b754-a4915b1180b9",
+      "type": "assert",
+      "params": {
+        "selector": "dashboard-heading",
+        "selectorType": "data-cy",
+        "assertion": "be.visible",
+        "value": ""
+      },
+      "position": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "3ef92ac2-7657-416e-95ba-1543724a9a8d": {
+      "id": "3ef92ac2-7657-416e-95ba-1543724a9a8d",
+      "type": "assert",
+      "params": {
+        "selector": ".welcome-banner",
+        "selectorType": "css",
+        "assertion": "contains",
+        "value": "Welcome"
+      },
+      "position": {
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "edges": {
+    "ccd8149f-445b-4f31-b217-aced669201f1": {
+      "id": "ccd8149f-445b-4f31-b217-aced669201f1",
+      "from": "6e8aaba8-30d4-40cc-a39b-55302bf83ec1",
+      "to": "49dd8e45-dd45-4121-9fd2-00930a06bd83",
+      "condition": "success"
+    },
+    "1d85cd0d-e89e-4865-8692-c003156c5bfc": {
+      "id": "1d85cd0d-e89e-4865-8692-c003156c5bfc",
+      "from": "49dd8e45-dd45-4121-9fd2-00930a06bd83",
+      "to": "1059d03c-32a6-49a5-9b11-d113d9ebcceb",
+      "condition": "success"
+    },
+    "692c0666-f60f-48ae-9b64-b3a5e7a2d6bb": {
+      "id": "692c0666-f60f-48ae-9b64-b3a5e7a2d6bb",
+      "from": "1059d03c-32a6-49a5-9b11-d113d9ebcceb",
+      "to": "0a59a629-49a2-41f7-9951-a7c32a457217",
+      "condition": "success"
+    },
+    "a990aba7-9878-47d6-ae56-424a8adef85a": {
+      "id": "a990aba7-9878-47d6-ae56-424a8adef85a",
+      "from": "0a59a629-49a2-41f7-9951-a7c32a457217",
+      "to": "7d888ae0-e054-41ad-b754-a4915b1180b9",
+      "condition": "success"
+    },
+    "a2ab378e-24c9-4aea-ab3b-003df163ff77": {
+      "id": "a2ab378e-24c9-4aea-ab3b-003df163ff77",
+      "from": "7d888ae0-e054-41ad-b754-a4915b1180b9",
+      "to": "3ef92ac2-7657-416e-95ba-1543724a9a8d",
+      "condition": "success"
+    }
+  }
+}
