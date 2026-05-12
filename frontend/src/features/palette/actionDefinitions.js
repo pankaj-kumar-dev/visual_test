@@ -1,7 +1,9 @@
-import { NODE_TYPES } from '../../core/model/nodeSchema.js';
+import { commandRegistry } from '../../core/registry/commandRegistry.ts';
+import '../../core/registry/builtinCommands.ts';
 
-export const PALETTE_ACTIONS = Object.entries(NODE_TYPES).map(([type, def]) => ({
-  type,
-  label: def.label,
-  icon: def.icon,
+export const PALETTE_ACTIONS = commandRegistry.rootCommands().map((def) => ({
+  name:     def.name,
+  label:    def.label,
+  icon:     def.icon,
+  category: def.category,
 }));

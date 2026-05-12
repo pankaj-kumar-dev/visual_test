@@ -1,0 +1,209 @@
+{
+  "version": "2.0",
+  "name": "TaskFlow — Create Task",
+  "target": "cypress",
+  "baseUrl": "http://localhost:5174",
+  "tags": ["tasks", "crud"],
+  "rootSuiteId": "suite-root",
+  "environments": [
+    { "name": "local", "baseUrl": "http://localhost:5174" }
+  ],
+  "activeEnvironment": "local",
+  "createdAt": "2026-05-12T00:00:00.000Z",
+  "updatedAt": "2026-05-12T00:00:00.000Z",
+  "nodes": {
+    "suite-root": {
+      "id": "suite-root",
+      "kind": "suite",
+      "name": "TaskFlow — Task Management",
+      "parentId": null,
+      "children": ["suite-tasks"],
+      "hooks": {
+        "beforeAll":  [],
+        "beforeEach": ["hook-auth"],
+        "afterEach":  [],
+        "afterAll":   []
+      }
+    },
+
+    "hook-auth": {
+      "id": "hook-auth",
+      "kind": "hook",
+      "hookKind": "beforeEach",
+      "parentId": "suite-root",
+      "steps": [
+        {
+          "id": "h-s1",
+          "label": "seed auth via localStorage (skip UI login)",
+          "command": {
+            "id": "h-c1",
+            "name": "visit",
+            "args": [{ "kind": "string", "value": "/login" }],
+            "chain": []
+          }
+        }
+      ]
+    },
+
+    "suite-tasks": {
+      "id": "suite-tasks",
+      "kind": "suite",
+      "name": "Task CRUD",
+      "parentId": "suite-root",
+      "children": ["test-login-first", "test-create"],
+      "hooks": {
+        "beforeAll": [], "beforeEach": [], "afterEach": [], "afterAll": []
+      }
+    },
+
+    "test-login-first": {
+      "id": "test-login-first",
+      "kind": "test",
+      "name": "login before task operations",
+      "parentId": "suite-tasks",
+      "steps": [
+        {
+          "id": "t1-s1",
+          "label": "enter email",
+          "command": {
+            "id": "t1-c1",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "login-email" } }],
+            "chain": [
+              { "id": "t1-c1a", "name": "type", "args": [{ "kind": "string", "value": "demo@taskflow.io" }], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "t1-s2",
+          "label": "enter password",
+          "command": {
+            "id": "t1-c2",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "login-password" } }],
+            "chain": [
+              { "id": "t1-c2a", "name": "type", "args": [{ "kind": "string", "value": "demo1234" }], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "t1-s3",
+          "label": "submit login",
+          "command": {
+            "id": "t1-c3",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "login-submit" } }],
+            "chain": [
+              { "id": "t1-c3a", "name": "click", "args": [], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "t1-s4",
+          "label": "confirm dashboard loaded",
+          "command": {
+            "id": "t1-c4",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "dashboard-page" } }],
+            "chain": [
+              { "id": "t1-c4a", "name": "should", "args": [{ "kind": "assertion", "assertion": "be.visible" }], "chain": [] }
+            ]
+          }
+        }
+      ]
+    },
+
+    "test-create": {
+      "id": "test-create",
+      "kind": "test",
+      "name": "navigates to tasks and opens create form",
+      "parentId": "suite-tasks",
+      "steps": [
+        {
+          "id": "t2-s1",
+          "label": "click Tasks in sidebar",
+          "command": {
+            "id": "t2-c1",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "nav-tasks" } }],
+            "chain": [
+              { "id": "t2-c1a", "name": "click", "args": [], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "t2-s2",
+          "label": "confirm tasks page",
+          "command": {
+            "id": "t2-c2",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "tasks-page" } }],
+            "chain": [
+              { "id": "t2-c2a", "name": "should", "args": [{ "kind": "assertion", "assertion": "be.visible" }], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "t2-s3",
+          "label": "click Create Task",
+          "command": {
+            "id": "t2-c3",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "create-task-btn" } }],
+            "chain": [
+              { "id": "t2-c3a", "name": "click", "args": [], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "t2-s4",
+          "label": "assert modal appears",
+          "command": {
+            "id": "t2-c4",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "task-form-modal" } }],
+            "chain": [
+              { "id": "t2-c4a", "name": "should", "args": [{ "kind": "assertion", "assertion": "be.visible" }], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "t2-s5",
+          "label": "type task title",
+          "command": {
+            "id": "t2-c5",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "task-title-input" } }],
+            "chain": [
+              { "id": "t2-c5a", "name": "type", "args": [{ "kind": "string", "value": "Automated test task" }], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "t2-s6",
+          "label": "submit form",
+          "command": {
+            "id": "t2-c6",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "task-form-submit" } }],
+            "chain": [
+              { "id": "t2-c6a", "name": "click", "args": [], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "t2-s7",
+          "label": "assert success toast",
+          "command": {
+            "id": "t2-c7",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "toast" } }],
+            "chain": [
+              { "id": "t2-c7a", "name": "should", "args": [{ "kind": "assertion", "assertion": "be.visible" }], "chain": [] }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

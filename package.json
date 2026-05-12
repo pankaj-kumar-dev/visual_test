@@ -1,0 +1,19 @@
+{
+  "name": "visual-test-builder",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev":         "concurrently -n backend,frontend -c cyan,green \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "dev:mock":    "concurrently -n backend,frontend -c cyan,green \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "dev:cypress": "concurrently -n backend,frontend -c cyan,green \"cross-env RUNNER=cypress npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "install:all": "npm install && npm install -w frontend && npm install -w backend"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3"
+  }
+}
