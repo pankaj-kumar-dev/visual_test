@@ -1,0 +1,55 @@
+[
+  {
+    "id": "1105022d-4a4c-4980-95cb-088080976ff7",
+    "name": "Demo Flow",
+    "description": "Demo flow",
+    "createdAt": "2026-05-09T08:58:48.131Z",
+    "updatedAt": "2026-05-09T08:58:48.131Z",
+    "flow": {
+      "version": "1.0",
+      "name": "Demo Flow",
+      "baseUrl": "",
+      "target": "cypress",
+      "rootNodeId": "n1",
+      "nodes": {
+        "n1": {
+          "id": "n1",
+          "type": "visit",
+          "params": {
+            "url": "/"
+          },
+          "position": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        "n2": {
+          "id": "n2",
+          "type": "click",
+          "params": {
+            "selector": "btn",
+            "selectorType": "data-cy"
+          },
+          "position": {
+            "x": 0,
+            "y": 0
+          }
+        }
+      },
+      "edges": {
+        "e1": {
+          "id": "e1",
+          "from": "n1",
+          "to": "n2",
+          "condition": "success"
+        }
+      },
+      "testCases": [],
+      "tags": [],
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z",
+      "environments": [],
+      "activeEnvironment": null
+    }
+  }
+]

@@ -1,119 +1,162 @@
 {
-  "version": "1.0",
-  "name": "Login Flow",
-  "baseUrl": "https://your-app.example.com",
-  "rootNodeId": "6e8aaba8-30d4-40cc-a39b-55302bf83ec1",
+  "version": "2.0",
+  "name": "TaskFlow — Login",
+  "target": "cypress",
+  "baseUrl": "http://localhost:5174",
+  "tags": ["auth", "smoke"],
+  "rootSuiteId": "suite-root",
+  "environments": [
+    { "name": "local", "baseUrl": "http://localhost:5174" }
+  ],
+  "activeEnvironment": "local",
+  "createdAt": "2026-05-12T00:00:00.000Z",
+  "updatedAt": "2026-05-12T00:00:00.000Z",
   "nodes": {
-    "6e8aaba8-30d4-40cc-a39b-55302bf83ec1": {
-      "id": "6e8aaba8-30d4-40cc-a39b-55302bf83ec1",
-      "type": "visit",
-      "params": {
-        "url": "/login"
-      },
-      "position": {
-        "x": 0,
-        "y": 0
+    "suite-root": {
+      "id": "suite-root",
+      "kind": "suite",
+      "name": "TaskFlow — Login",
+      "parentId": null,
+      "children": ["test-success", "test-error"],
+      "hooks": {
+        "beforeAll":  [],
+        "beforeEach": ["hook-navigate"],
+        "afterEach":  [],
+        "afterAll":   []
       }
     },
-    "49dd8e45-dd45-4121-9fd2-00930a06bd83": {
-      "id": "49dd8e45-dd45-4121-9fd2-00930a06bd83",
-      "type": "type",
-      "params": {
-        "selector": "username",
-        "selectorType": "data-cy",
-        "text": "admin",
-        "clearFirst": true
-      },
-      "position": {
-        "x": 0,
-        "y": 0
-      }
+
+    "hook-navigate": {
+      "id": "hook-navigate",
+      "kind": "hook",
+      "hookKind": "beforeEach",
+      "parentId": "suite-root",
+      "steps": [
+        {
+          "id": "h1-s1",
+          "command": {
+            "id": "h1-c1",
+            "name": "visit",
+            "args": [{ "kind": "string", "value": "/login" }],
+            "chain": []
+          }
+        }
+      ]
     },
-    "1059d03c-32a6-49a5-9b11-d113d9ebcceb": {
-      "id": "1059d03c-32a6-49a5-9b11-d113d9ebcceb",
-      "type": "type",
-      "params": {
-        "selector": "password",
-        "selectorType": "data-cy",
-        "text": "password123",
-        "clearFirst": true
-      },
-      "position": {
-        "x": 0,
-        "y": 0
-      }
+
+    "test-success": {
+      "id": "test-success",
+      "kind": "test",
+      "name": "logs in with valid credentials",
+      "parentId": "suite-root",
+      "steps": [
+        {
+          "id": "s1",
+          "label": "type email",
+          "command": {
+            "id": "c1",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "login-email" } }],
+            "chain": [
+              { "id": "c1a", "name": "type", "args": [{ "kind": "string", "value": "demo@taskflow.io" }], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "s2",
+          "label": "type password",
+          "command": {
+            "id": "c2",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "login-password" } }],
+            "chain": [
+              { "id": "c2a", "name": "type", "args": [{ "kind": "string", "value": "demo1234" }], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "s3",
+          "label": "click sign in",
+          "command": {
+            "id": "c3",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "login-submit" } }],
+            "chain": [
+              { "id": "c3a", "name": "click", "args": [], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "s4",
+          "label": "assert dashboard visible",
+          "command": {
+            "id": "c4",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "dashboard-page" } }],
+            "chain": [
+              { "id": "c4a", "name": "should", "args": [{ "kind": "assertion", "assertion": "be.visible" }], "chain": [] }
+            ]
+          }
+        }
+      ]
     },
-    "0a59a629-49a2-41f7-9951-a7c32a457217": {
-      "id": "0a59a629-49a2-41f7-9951-a7c32a457217",
-      "type": "click",
-      "params": {
-        "selector": "login-btn",
-        "selectorType": "data-cy"
-      },
-      "position": {
-        "x": 0,
-        "y": 0
-      }
-    },
-    "7d888ae0-e054-41ad-b754-a4915b1180b9": {
-      "id": "7d888ae0-e054-41ad-b754-a4915b1180b9",
-      "type": "assert",
-      "params": {
-        "selector": "dashboard-heading",
-        "selectorType": "data-cy",
-        "assertion": "be.visible",
-        "value": ""
-      },
-      "position": {
-        "x": 0,
-        "y": 0
-      }
-    },
-    "3ef92ac2-7657-416e-95ba-1543724a9a8d": {
-      "id": "3ef92ac2-7657-416e-95ba-1543724a9a8d",
-      "type": "assert",
-      "params": {
-        "selector": ".welcome-banner",
-        "selectorType": "css",
-        "assertion": "contains",
-        "value": "Welcome"
-      },
-      "position": {
-        "x": 0,
-        "y": 0
-      }
-    }
-  },
-  "edges": {
-    "ccd8149f-445b-4f31-b217-aced669201f1": {
-      "id": "ccd8149f-445b-4f31-b217-aced669201f1",
-      "from": "6e8aaba8-30d4-40cc-a39b-55302bf83ec1",
-      "to": "49dd8e45-dd45-4121-9fd2-00930a06bd83",
-      "condition": "success"
-    },
-    "1d85cd0d-e89e-4865-8692-c003156c5bfc": {
-      "id": "1d85cd0d-e89e-4865-8692-c003156c5bfc",
-      "from": "49dd8e45-dd45-4121-9fd2-00930a06bd83",
-      "to": "1059d03c-32a6-49a5-9b11-d113d9ebcceb",
-      "condition": "success"
-    },
-    "692c0666-f60f-48ae-9b64-b3a5e7a2d6bb": {
-      "id": "692c0666-f60f-48ae-9b64-b3a5e7a2d6bb",
-      "from": "1059d03c-32a6-49a5-9b11-d113d9ebcceb",
-      "to": "0a59a629-49a2-41f7-9951-a7c32a457217",
-      "condition": "success"
-    },
-    "a990aba7-9878-47d6-ae56-424a8adef85a": {
-      "id": "a990aba7-9878-47d6-ae56-424a8adef85a",
-      "from": "0a59a629-49a2-41f7-9951-a7c32a457217",
-      "to": "7d888ae0-e054-41ad-b754-a4915b1180b9",
-      "condition": "success"
-    },
-    "a2ab378e-24c9-4aea-ab3b-003df163ff77": {
-      "id": "a2ab378e-24c9-4aea-ab3b-003df163ff77",
-      "from": "7d888ae0-e054-41ad-b754-a4915b1180b9",
-      "to": "3ef92ac2-7657-416e-95ba-1543724a9a8d",
-      "condition": "success"
+
+    "test-error": {
+      "id": "test-error",
+      "kind": "test",
+      "name": "shows error for wrong credentials",
+      "parentId": "suite-root",
+      "steps": [
+        {
+          "id": "s5",
+          "label": "type wrong email",
+          "command": {
+            "id": "c5",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "login-email" } }],
+            "chain": [
+              { "id": "c5a", "name": "type", "args": [{ "kind": "string", "value": "wrong@example.com" }], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "s6",
+          "label": "type wrong password",
+          "command": {
+            "id": "c6",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "login-password" } }],
+            "chain": [
+              { "id": "c6a", "name": "type", "args": [{ "kind": "string", "value": "wrongpass" }], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "s7",
+          "label": "click sign in",
+          "command": {
+            "id": "c7",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "login-submit" } }],
+            "chain": [
+              { "id": "c7a", "name": "click", "args": [], "chain": [] }
+            ]
+          }
+        },
+        {
+          "id": "s8",
+          "label": "assert error message visible",
+          "command": {
+            "id": "c8",
+            "name": "get",
+            "args": [{ "kind": "selector", "value": { "strategy": "testId", "value": "login-error" } }],
+            "chain": [
+              { "id": "c8a", "name": "should", "args": [{ "kind": "assertion", "assertion": "be.visible" }], "chain": [] },
+              { "id": "c8b", "name": "and", "args": [{ "kind": "assertion", "assertion": "contain.text", "expected": "Invalid" }], "chain": [] }
+            ]
+          }
+        }
+      ]
     }
   }
 }

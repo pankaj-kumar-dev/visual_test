@@ -1,112 +1,86 @@
-import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  closestCenter,
-} from '@dnd-kit/core';
 import { useState } from 'react';
-import { useFlowStore } from '../core/state/useFlowStore.js';
-import { graphToLinear } from '../core/transformer/graphToLinear.js';
+import { useFlowStore, selectCanUndo, selectCanRedo } from '../core/state/useFlowStore.ts';
 import ActionPalette from '../features/palette/ActionPalette.jsx';
 import Canvas from '../features/canvas/Canvas.jsx';
 import ConfigPanel from '../features/config/ConfigPanel.jsx';
 import CodePanel from '../features/codegen/CodePanel.jsx';
-import { NODE_TYPES } from '../core/model/nodeSchema.js';
+import ExecutionPanel from '../features/execution/ExecutionPanel.jsx';
+import HistoryPanel from '../features/history/HistoryPanel.jsx';
+import AnalyticsPanel from '../features/analytics/AnalyticsPanel.jsx';
+import { useUndoRedo } from '../hooks/useUndoRedo.ts';
+import { flowApi } from '../services/flowApi.ts';
+
+const RIGHT_TABS = [
+  { id: 'code',      label: 'Code' },
+  { id: 'run',       label: 'Run' },
+  { id: 'history',   label: 'History' },
+  { id: 'analytics', label: 'Analytics' },
+];
 
 export default function App() {
-  const [activeType, setActiveType] = useState(null);
+  const [rightTab, setRightTab] = useState('code');
+  const [saveStatus, setSaveStatus] = useState(null);
+  const canUndo = useFlowStore(selectCanUndo);
+  const canRedo = useFlowStore(selectCanRedo);
+  const flow = useFlowStore((s) => s.flow);
+  useUndoRedo();
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } })
-  );
-
-  const handleDragStart = ({ active }) => {
-    const data = active.data.current;
-    if (data?.source === 'palette') setActiveType(data.type);
-    else if (data?.source === 'canvas') {
-      const flow = useFlowStore.getState().flow;
-      const node = flow.nodes[data.nodeId];
-      setActiveType(node?.type ?? null);
-    }
-  };
-
-  const handleDragEnd = ({ active, over }) => {
-    setActiveType(null);
-    if (!over) return;
-
-    const aData = active.data.current;
-
-    // Palette → canvas: always append to tail
-    if (aData?.source === 'palette') {
-      useFlowStore.getState().addNode(aData.type);
-      return;
-    }
-
-    // Canvas → canvas: reorder using anchor-after semantics
-    if (aData?.source === 'canvas' && active.id !== over.id) {
-      const flow = useFlowStore.getState().flow;
-      let ordered;
-      try { ordered = graphToLinear(flow); } catch { return; }
-
-      const fromIdx = ordered.findIndex((n) => n.id === active.id);
-      const toIdx   = ordered.findIndex((n) => n.id === over.id);
-      if (fromIdx < 0 || toIdx < 0 || fromIdx === toIdx) return;
-
-      // Determine anchor: node active should appear AFTER in new order
-      let anchorId;
-      if (fromIdx < toIdx) {
-        // Moving down: active lands after over
-        anchorId = over.id;
-      } else {
-        // Moving up: active lands before over → after the element preceding over
-        anchorId = toIdx === 0 ? null : ordered[toIdx - 1].id;
-      }
-
-      useFlowStore.getState().reorderNode(active.id, anchorId);
+  const handleSave = async () => {
+    setSaveStatus('saving');
+    try {
+      await flowApi.save(flow);
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus(null), 2000);
+    } catch {
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus(null), 3000);
     }
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="app">
-        <header className="app-header">
-          <h1>Cypress Test Builder</h1>
+    <div className="app">
+      <header className="app-header">
+        <h1>Visual Test Builder</h1>
+        <div className="header-actions">
+          <button className="reset-btn" disabled={!canUndo} onClick={() => useFlowStore.getState().undo()} title="Undo (Ctrl+Z)">Undo</button>
+          <button className="reset-btn" disabled={!canRedo} onClick={() => useFlowStore.getState().redo()} title="Redo (Ctrl+Shift+Z)">Redo</button>
           <button
             className="reset-btn"
-            onClick={() => useFlowStore.getState().resetFlow()}
+            onClick={handleSave}
+            disabled={saveStatus === 'saving'}
           >
-            Reset
+            {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved ✓' : saveStatus === 'error' ? 'Error ✗' : 'Save Flow'}
           </button>
-        </header>
-        <main className="app-grid">
-          <ActionPalette />
-          <Canvas />
-          <div className="right-stack">
-            <ConfigPanel />
-            <CodePanel />
-          </div>
-        </main>
-      </div>
+          <button className="reset-btn" onClick={() => useFlowStore.getState().resetFlow()}>Reset</button>
+        </div>
+      </header>
 
-      <DragOverlay>
-        {activeType && (
-          <div className={`step-card type-${activeType} drag-overlay`}>
-            <div className="step-head">
-              <span className={`step-icon icon-${activeType}`}>
-                {NODE_TYPES[activeType]?.icon}
-              </span>
-              <span className="step-label">{NODE_TYPES[activeType]?.label}</span>
+      <main className="app-grid">
+        <ActionPalette />
+        <Canvas />
+        <div className="right-stack">
+          <ConfigPanel />
+          <div className="right-tabs">
+            <div className="tab-bar">
+              {RIGHT_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  className={`tab-btn ${rightTab === tab.id ? 'active' : ''}`}
+                  onClick={() => setRightTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <div className="tab-content">
+              {rightTab === 'code'      && <CodePanel />}
+              {rightTab === 'run'       && <ExecutionPanel />}
+              {rightTab === 'history'   && <HistoryPanel />}
+              {rightTab === 'analytics' && <AnalyticsPanel />}
             </div>
           </div>
-        )}
-      </DragOverlay>
-    </DndContext>
+        </div>
+      </main>
+    </div>
   );
 }

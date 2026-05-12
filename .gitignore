@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.vtb-tmp/
 .env
 .env.local
 *.local

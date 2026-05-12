@@ -1,27 +1,38 @@
-import { useMemo } from 'react';
-import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useFlowStore } from '../../core/state/useFlowStore.js';
-import { graphToLinear } from '../../core/transformer/graphToLinear.js';
-import SortableStep from './SortableStep.jsx';
-import loginFlow from '../../../examples/login-flow.json';
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from '@dnd-kit/core';
+import { useFlowStore, selectRootSuite } from '../../core/state/useFlowStore.ts';
+import SuiteBlock from './SuiteBlock.jsx';
+import loginFlow    from '../../../examples/login-flow.json';
+import tasksFlow    from '../../../examples/taskflow-tasks.json';
 
 export default function Canvas() {
-  const flow          = useFlowStore((s) => s.flow);
-  const selectedNodeId = useFlowStore((s) => s.selectedNodeId);
-  const setSelected   = useFlowStore((s) => s.setSelected);
-  const removeNode    = useFlowStore((s) => s.removeNode);
+  const flow       = useFlowStore((s) => s.flow);
+  const rootSuite  = useFlowStore(selectRootSuite);
+  const reorderStep = useFlowStore((s) => s.reorderStep);
 
-  const orderedNodes = useMemo(() => {
-    try { return graphToLinear(flow); } catch { return []; }
-  }, [flow]);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+  );
 
-  const nodeIds = orderedNodes.map((n) => n.id);
-
-  const { setNodeRef, isOver } = useDroppable({
-    id: 'canvas-dropzone',
-    data: { source: 'canvas-empty' },
-  });
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+    const aData = active.data.current;
+    const oData = over.data.current;
+    // Only handle step reorder within same parent
+    if (aData?.source === 'step' && oData?.source === 'step' && aData.nodeId === oData.nodeId) {
+      const nodeId = aData.nodeId;
+      const node = useFlowStore.getState().flow.nodes[nodeId];
+      if (!node || (node.kind !== 'test' && node.kind !== 'hook')) return;
+      const fromIdx = node.steps.findIndex((s) => s.id === aData.stepId);
+      const toIdx   = node.steps.findIndex((s) => s.id === oData.stepId);
+      if (fromIdx >= 0 && toIdx >= 0) reorderStep(nodeId, fromIdx, toIdx);
+    }
+  };
 
   return (
     <section className="canvas">
@@ -34,44 +45,55 @@ export default function Canvas() {
         />
         <input
           className="flow-baseurl"
-          placeholder="baseUrl (optional)"
+          placeholder="baseUrl"
           value={flow.baseUrl}
           onChange={(e) => useFlowStore.getState().setFlowMeta({ baseUrl: e.target.value })}
         />
-        <button
-          className="example-btn"
-          title="Load the built-in login flow example"
-          onClick={() => useFlowStore.getState().loadFlow(loginFlow)}
+        <select
+          className="flow-target"
+          value={flow.target}
+          onChange={(e) => useFlowStore.getState().setFlowMeta({ target: e.target.value })}
         >
-          Example
-        </button>
+          <option value="cypress">Cypress</option>
+          <option value="playwright">Playwright</option>
+        </select>
+        {flow.environments.length > 0 && (
+          <select
+            className="flow-target"
+            value={flow.activeEnvironment ?? ''}
+            onChange={(e) => useFlowStore.getState().setFlowMeta({ activeEnvironment: e.target.value || null })}
+          >
+            <option value="">Default env</option>
+            {flow.environments.map((env) => (
+              <option key={env.name} value={env.name}>{env.name}</option>
+            ))}
+          </select>
+        )}
+        <select
+          className="flow-target"
+          defaultValue=""
+          onChange={(e) => {
+            if (e.target.value === 'login')  useFlowStore.getState().loadFlow(loginFlow);
+            if (e.target.value === 'tasks')  useFlowStore.getState().loadFlow(tasksFlow);
+            e.target.value = '';
+          }}
+          title="Load example flow"
+        >
+          <option value="" disabled>Examples…</option>
+          <option value="login">Login flow</option>
+          <option value="tasks">Create task flow</option>
+        </select>
       </header>
 
-      <div
-        ref={setNodeRef}
-        className={`canvas-drop ${isOver ? 'is-over' : ''} ${orderedNodes.length === 0 ? 'is-empty' : ''}`}
-      >
-        {orderedNodes.length === 0 && (
-          <div className="canvas-empty-msg">Drag actions here to build a test</div>
-        )}
-
-        <SortableContext items={nodeIds} strategy={verticalListSortingStrategy}>
-          {orderedNodes.map((node, i) => (
-            <div key={node.id}>
-              <SortableStep
-                node={node}
-                index={i}
-                selected={node.id === selectedNodeId}
-                onSelect={() => setSelected(node.id)}
-                onRemove={() => removeNode(node.id)}
-              />
-              {i < orderedNodes.length - 1 && (
-                <div className="node-connector" />
-              )}
-            </div>
-          ))}
-        </SortableContext>
-      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <div className="canvas-drop">
+          {rootSuite ? (
+            <SuiteBlock suiteId={rootSuite.id} depth={0} />
+          ) : (
+            <div className="canvas-empty-msg">Flow has no root suite.</div>
+          )}
+        </div>
+      </DndContext>
     </section>
   );
 }
