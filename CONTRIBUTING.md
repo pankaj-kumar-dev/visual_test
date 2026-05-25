@@ -3,44 +3,34 @@
 ## Setup
 
 ```bash
-cd frontend
-npm install
+npm run install:all
 npm run dev
 ```
 
-## Architecture
+## Architecture Rules
 
+| Rule | Reason |
+| --- | --- |
+| Keep `frontend/src/core` free of React/UI imports | Core owns portable model, validation, registry, codegen |
+| Treat `Flow` v2 as the source contract | UI, codegen, persistence, execution, and analytics depend on it |
+| Add command behavior through the registry first | Keeps defaults, validation, and chain semantics centralized |
+| Keep backend routes thin | Route handlers should delegate to stores, queue, runners, analytics |
+| Do not commit local runtime histories | `backend/data/*.json` is generated development state |
+
+## Adding A Command
+
+1. Register metadata/default args/validation in `frontend/src/core/registry/builtinCommands.ts`.
+2. Add or update Cypress emission in `frontend/src/core/codegen/emitters/cypressEmitter.ts`.
+3. Add or update Playwright emission in `frontend/src/core/codegen/emitters/playwrightEmitter.ts`.
+4. Add UI field support only if the existing generic argument editors are not enough.
+5. Add tests before expanding command coverage in production work.
+
+## Verification
+
+```bash
+npm run build -w frontend
+npm run lint -w frontend
+npm run build -w backend
 ```
-frontend/src/
-├── core/          # Zero React. Pure JS: model, state, transformer, codegen, parser.
-├── features/      # React components: palette, canvas, config, codegen UI.
-├── app/           # Root layout + DndContext.
-└── utils/         # id.js (crypto.randomUUID)
-```
 
-**Layer rule:** `core/` must never import from React or any UI library.
-Verify with: `grep -r "from 'react'" frontend/src/core/` — must return nothing.
-
-## Adding a new node type
-
-1. Add entry to `NODE_TYPES` in `core/model/nodeSchema.js` with `label`, `icon`, `defaultParams`.
-2. Add emitter: `core/codegen/emitters/{type}.js` — exports `emit{Type}(node)`.
-3. Register emitter in `core/codegen/generate.js` EMITTERS map.
-4. Add matcher: `core/parser/matchers/{type}.js` — exports `match{Type}(line)`.
-5. Register matcher in `core/parser/parse.js` MATCHERS array.
-6. Add field component: `features/config/fields/{Type}Fields.jsx`.
-7. Register in `features/config/ConfigPanel.jsx` FIELDS map.
-8. Round-trip test: `generate(flow)` → `parse(code)` → params must deep-equal originals.
-
-## Key invariants
-
-- Flow is always a single linear chain from `rootNodeId` (MVP).
-- `nodes` and `edges` are `Record<id, object>` — O(1) lookup, never arrays.
-- Every codegen emitter must have a matching parser matcher (reversibility).
-- `condition: 'success'` on all edges for MVP. Branching comes via new edge types later.
-
-## Pull requests
-
-- One PR per feature/fix.
-- Include a round-trip test for any codegen change.
-- Run `npm run lint` before submitting.
+The repository currently lacks automated tests. Changes to flow schema, validation, codegen, or queue behavior should add focused tests as part of production hardening.

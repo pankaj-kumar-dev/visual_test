@@ -1,10 +1,12 @@
 node_modules/
 dist/
 .vtb-tmp/
+backend/data/*.json
 .env
 .env.local
 *.local
-
+.ai/
+interview-prep/
 # Editor
 .vscode/
 .idea/
@@ -14,4 +16,5 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
 .claude/
