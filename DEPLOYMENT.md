@@ -2,7 +2,16 @@
 
 ## Current Local Deployment
 
-![Deployment topology](docs/diagrams/deployment.png)
+```mermaid
+graph LR
+    subgraph Local
+        FE["Frontend\nVite dev server\n:5173"]
+        BE["Backend\ntsx watch\n:3001"]
+        FS[/"JSON files\nbackend/data/"/]
+        FE <-->|"HTTP + SSE"| BE
+        BE --- FS
+    end
+```
 
 | Component | Runtime | Default |
 | --- | --- | --- |
@@ -60,4 +69,4 @@ npm run lint -w frontend
 
 ## Deployment Tradeoff
 
-The current local-first setup is intentionally low-friction for a showcase and interview demo. It is not a production deployment model because execution state, queues, and SSE subscribers are process-local.
+The current local-first setup is intentionally low-friction for demo and local development. It is not a production deployment model: execution state, queues, and SSE subscribers are process-local.

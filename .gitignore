@@ -7,6 +7,10 @@ backend/data/*.json
 *.local
 .ai/
 interview-prep/
+private-notes/
+prep/
+ai-notes/
+INTERVIEW_GUIDE.md
 # Editor
 .vscode/
 .idea/

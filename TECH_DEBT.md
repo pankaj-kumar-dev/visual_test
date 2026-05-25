@@ -46,15 +46,6 @@ The codebase has a strong MVP architecture: a typed flow model, command registry
 | API | OpenAPI spec, consistent error model, pagination |
 | Frontend | Error boundaries, loading states audit, accessibility pass |
 
-## Cleanup Completed For Showcase
-
-| Cleanup | Rationale |
-| --- | --- |
-| Root README rewritten | Replaces stale v1/tutorial content with architecture landing page |
-| Top-level architecture docs added | Makes the repo scan-friendly for recruiters and senior reviewers |
-| Diagrams added under `docs/diagrams` | Gives immediate system-design signal |
-| Runtime data ignored | Prevents local execution history from dominating the repo |
-
 ## Recommended Next Sprint
 
 | Priority | Task | Outcome |
