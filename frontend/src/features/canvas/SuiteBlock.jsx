@@ -39,7 +39,7 @@ export default function SuiteBlock({ suiteId, depth = 0 }) {
         className={`suite-head ${isRoot ? 'suite-head-root' : ''}`}
         onClick={() => !isRoot && setSelection({ kind: 'node', nodeId: suiteId })}
       >
-        <button className="collapse-btn" onClick={(e) => { e.stopPropagation(); setCollapsed((c) => !c); }}>
+        <button className="collapse-btn" onClick={(e) => { e.stopPropagation(); setCollapsed((c) => !c); }} aria-label={collapsed ? 'Expand suite' : 'Collapse suite'}>
           {collapsed ? '▶' : '▼'}
         </button>
         <span className="suite-icon">describe</span>
@@ -78,7 +78,7 @@ export default function SuiteBlock({ suiteId, depth = 0 }) {
             )}
           </div>
           {!isRoot && (
-            <button className="remove-btn" title="Remove suite" onClick={() => removeSuite(suiteId)}>×</button>
+            <button className="remove-btn" title="Remove suite" aria-label="Remove suite" onClick={() => removeSuite(suiteId)}>×</button>
           )}
         </div>
       </div>

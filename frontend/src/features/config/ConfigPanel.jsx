@@ -101,7 +101,7 @@ function CommandEditor({ cmd, commandPath, nodeId, stepId, depth = 0 }) {
   const chainableCommands = commandRegistry.all().filter((d) => d.isChainable);
 
   return (
-    <div className={`cmd-editor depth-${depth}`} style={depth > 0 ? { marginLeft: '12px', borderLeft: '2px solid #2a2f3e', paddingLeft: '8px' } : undefined}>
+    <div className={`cmd-editor depth-${depth}`} style={depth > 0 ? { marginLeft: '12px', borderLeft: '2px solid var(--border)', paddingLeft: '8px' } : undefined}>
       <div className="cmd-editor-head">
         <span className="cmd-name">.{cmd.name}()</span>
         {commandPath.length > 0 && (
@@ -109,6 +109,7 @@ function CommandEditor({ cmd, commandPath, nodeId, stepId, depth = 0 }) {
             className="cmd-remove-btn"
             onClick={() => removeChain(nodeId, stepId, commandPath)}
             title="Remove this command"
+            aria-label="Remove this command"
           >×</button>
         )}
       </div>
@@ -269,6 +270,25 @@ function HookEditor({ node }) {
   );
 }
 
+// ─── Node context header ──────────────────────────────────────────────────────
+
+const NODE_KIND_LABEL = {
+  suite: 'describe',
+  test:  'it',
+  hook:  'hook',
+};
+
+function NodeContextHeader({ node }) {
+  const kind  = NODE_KIND_LABEL[node.kind] ?? node.kind;
+  const name  = node.name ?? '';
+  return (
+    <div className="config-node-header">
+      <span className="config-node-kind">{kind}</span>
+      <span className="config-node-name">{name}</span>
+    </div>
+  );
+}
+
 // ─── Main ConfigPanel ─────────────────────────────────────────────────────────
 
 export default function ConfigPanel() {
@@ -279,6 +299,7 @@ export default function ConfigPanel() {
     return (
       <aside className="config">
         <h3 className="panel-title">Config</h3>
+        <NodeContextHeader node={stepped.node} />
         <StepEditor nodeId={stepped.node.id} step={stepped.step} />
       </aside>
     );
@@ -296,6 +317,7 @@ export default function ConfigPanel() {
   return (
     <aside className="config">
       <h3 className="panel-title">Config</h3>
+      <NodeContextHeader node={node} />
       {node.kind === 'suite' && <SuiteEditor node={node} />}
       {node.kind === 'test'  && <TestEditor  node={node} />}
       {node.kind === 'hook'  && <HookEditor  node={node} />}

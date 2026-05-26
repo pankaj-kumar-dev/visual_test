@@ -41,11 +41,13 @@ export default function Canvas() {
           className="flow-name"
           value={flow.name}
           placeholder="Flow name"
+          aria-label="Flow name"
           onChange={(e) => useFlowStore.getState().setFlowMeta({ name: e.target.value })}
         />
         <input
           className="flow-baseurl"
           placeholder="baseUrl"
+          aria-label="Base URL"
           value={flow.baseUrl}
           onChange={(e) => useFlowStore.getState().setFlowMeta({ baseUrl: e.target.value })}
         />
@@ -90,7 +92,7 @@ export default function Canvas() {
           {rootSuite ? (
             <SuiteBlock suiteId={rootSuite.id} depth={0} />
           ) : (
-            <div className="canvas-empty-msg">Flow has no root suite.</div>
+            <div className="canvas-empty-msg">Drag a command from the palette to start building, or load an example above.</div>
           )}
         </div>
       </DndContext>

@@ -33,12 +33,12 @@ export default function HookBlock({ hookId }) {
   return (
     <div className={`hook-block hook-${hook.hookKind} ${isSelected ? 'selected' : ''}`}>
       <div className="hook-head" onClick={() => setSelection({ kind: 'node', nodeId: hookId })}>
-        <button className="collapse-btn" onClick={(e) => { e.stopPropagation(); setCollapsed((c) => !c); }}>
+        <button className="collapse-btn" onClick={(e) => { e.stopPropagation(); setCollapsed((c) => !c); }} aria-label={collapsed ? 'Expand hook' : 'Collapse hook'}>
           {collapsed ? '▶' : '▼'}
         </button>
         <span className="hook-kind-label">{HOOK_LABELS[hook.hookKind] ?? hook.hookKind}</span>
         <span className="hook-step-count">{hook.steps.length} step{hook.steps.length !== 1 ? 's' : ''}</span>
-        <button className="remove-btn" onClick={(e) => { e.stopPropagation(); removeHook(hookId); }} title="Remove hook">×</button>
+        <button className="remove-btn" onClick={(e) => { e.stopPropagation(); removeHook(hookId); }} title="Remove hook" aria-label="Remove hook">×</button>
       </div>
 
       {!collapsed && (

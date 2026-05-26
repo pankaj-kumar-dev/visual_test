@@ -1,11 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { executionApi } from '../../services/executionApi.ts';
 
-const STATUS_COLOR = {
-  queued: '#8a93a6', running: '#4f8cff',
-  passed: '#4ade80', failed: '#ef4444', cancelled: '#8a93a6',
-};
-
 const STATUS_ICON = {
   queued: '⏳', running: '▶', passed: '✅', failed: '✗', cancelled: '⊘',
 };
@@ -21,6 +16,16 @@ function fmtTime(iso) {
     month: 'short', day: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });
+}
+
+function SkeletonRows() {
+  return (
+    <div className="history-list">
+      {[0,1,2].map(i => (
+        <div key={i} className="skeleton skeleton-row" />
+      ))}
+    </div>
+  );
 }
 
 export default function HistoryPanel() {
@@ -43,9 +48,9 @@ export default function HistoryPanel() {
 
   useEffect(() => { load(); }, [load]);
 
-  const passed = executions.filter(e => e.status === 'passed').length;
-  const failed = executions.filter(e => e.status === 'failed').length;
-  const total  = executions.filter(e => e.status === 'passed' || e.status === 'failed').length;
+  const passed   = executions.filter(e => e.status === 'passed').length;
+  const failed   = executions.filter(e => e.status === 'failed').length;
+  const total    = executions.filter(e => e.status === 'passed' || e.status === 'failed').length;
   const passRate = total > 0 ? Math.round((passed / total) * 100) : null;
 
   return (
@@ -60,47 +65,58 @@ export default function HistoryPanel() {
       {passRate !== null && (
         <div className="history-stats">
           <span className="stat-item">
-            <span className="stat-val" style={{ color: '#4ade80' }}>{passed}</span>
+            <span className="stat-val text-success">{passed}</span>
             <span className="stat-label"> passed</span>
           </span>
           <span className="stat-item">
-            <span className="stat-val" style={{ color: '#ef4444' }}>{failed}</span>
+            <span className="stat-val text-danger">{failed}</span>
             <span className="stat-label"> failed</span>
           </span>
           <span className="stat-item">
-            <span className="stat-val" style={{ color: '#4f8cff' }}>{passRate}%</span>
+            <span className="stat-val text-accent">{passRate}%</span>
             <span className="stat-label"> pass rate</span>
           </span>
         </div>
       )}
 
-      {error && <div className="exec-error">{error}</div>}
+      {loading && executions.length === 0 && <SkeletonRows />}
 
-      {!loading && executions.length === 0 && !error && (
-        <p className="panel-hint">No executions yet. Run a test to see history.</p>
+      {error && (
+        <div className="panel-empty">
+          <p className="panel-empty-title">Could not load history</p>
+          <p className="panel-empty-desc">{error}</p>
+        </div>
       )}
 
-      <div className="history-list">
-        {executions.map(ex => (
-          <div key={ex.id} className="history-row">
-            <span
-              className="history-status"
-              style={{ color: STATUS_COLOR[ex.status] ?? '#8a93a6' }}
-              title={ex.status}
-            >
-              {STATUS_ICON[ex.status] ?? '?'}
-            </span>
-            <div className="history-info">
-              <span className="history-name">{ex.flowName}</span>
-              <span className="history-time">{fmtTime(ex.createdAt)}</span>
+      {!loading && !error && executions.length === 0 && (
+        <div className="panel-empty">
+          <p className="panel-empty-title">No runs yet</p>
+          <p className="panel-empty-desc">Run a test to start building execution history.</p>
+        </div>
+      )}
+
+      {executions.length > 0 && (
+        <div className="history-list">
+          {executions.map(ex => (
+            <div key={ex.id} className="history-row">
+              <span
+                className={`history-status status-${ex.status}`}
+                title={ex.status}
+              >
+                {STATUS_ICON[ex.status] ?? '?'}
+              </span>
+              <div className="history-info">
+                <span className="history-name">{ex.flowName}</span>
+                <span className="history-time">{fmtTime(ex.createdAt)}</span>
+              </div>
+              <div className="history-right">
+                <span className="history-dur">{fmtDuration(ex.durationMs)}</span>
+                <span className="history-steps">{ex.stepCount} steps</span>
+              </div>
             </div>
-            <div className="history-right">
-              <span className="history-dur">{fmtDuration(ex.durationMs)}</span>
-              <span className="history-steps">{ex.stepCount} steps</span>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

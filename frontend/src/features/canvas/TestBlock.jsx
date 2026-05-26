@@ -34,7 +34,7 @@ export default function TestBlock({ testId }) {
         className="test-head"
         onClick={() => setSelection({ kind: 'node', nodeId: testId })}
       >
-        <button className="collapse-btn" onClick={(e) => { e.stopPropagation(); setCollapsed((c) => !c); }}>
+        <button className="collapse-btn" onClick={(e) => { e.stopPropagation(); setCollapsed((c) => !c); }} aria-label={collapsed ? 'Expand test' : 'Collapse test'}>
           {collapsed ? '▶' : '▼'}
         </button>
         <span className="test-icon">it</span>
@@ -62,7 +62,7 @@ export default function TestBlock({ testId }) {
         {indicator && <span className="test-indicator" title={test.skip ? 'skipped' : 'only'}>{indicator}</span>}
         {hasError && <span className="test-err-icon" title="Validation errors">⚠</span>}
         <span className="test-step-count">{test.steps.length}</span>
-        <button className="remove-btn" onClick={(e) => { e.stopPropagation(); removeTest(testId); }} title="Remove test">×</button>
+        <button className="remove-btn" onClick={(e) => { e.stopPropagation(); removeTest(testId); }} title="Remove test" aria-label="Remove test">×</button>
       </div>
 
       {!collapsed && (
