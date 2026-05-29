@@ -141,10 +141,10 @@ export function createHookNode(hookKind: HookKind, parentId: string): HookTreeNo
   };
 }
 
-export function createStep(commandName = 'get'): StepNode {
+export function createStep(commandName = 'get', args: ArgNode[] = []): StepNode {
   return {
     id:      newId(),
-    command: createCommand(commandName),
+    command: createCommand(commandName, args),
   };
 }
 
