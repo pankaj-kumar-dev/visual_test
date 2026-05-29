@@ -532,7 +532,8 @@ input[type="checkbox"] { width: auto; padding: 0; }
 /* ─── History panel ───────────────────────────────────────────────────────── */
 
 .history-panel  { display: flex; flex-direction: column; gap: 10px; }
-.history-head   { display: flex; align-items: center; justify-content: space-between; }
+.history-head   { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.history-tabs   { display: flex; gap: 4px; }
 .history-stats  { display: flex; gap: 16px; }
 .stat-item      { font-size: 13px; }
 .stat-val       { font-weight: 700; font-size: 16px; }

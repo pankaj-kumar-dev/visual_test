@@ -197,12 +197,6 @@ function SuiteEditor({ node }) {
           onChange={(e) => renameSuite(node.id, e.target.value)}
         />
       </div>
-      {node.parallel !== undefined && (
-        <div className="field-row">
-          <label className="field-label">Parallel</label>
-          <input type="checkbox" checked={!!node.parallel} readOnly />
-        </div>
-      )}
     </div>
   );
 }

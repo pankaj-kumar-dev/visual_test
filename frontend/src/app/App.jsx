@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useFlowStore, selectCanUndo, selectCanRedo } from '../core/state/useFlowStore.ts';
 import ActionPalette from '../features/palette/ActionPalette.jsx';
 import Canvas from '../features/canvas/Canvas.jsx';
@@ -20,21 +20,34 @@ const RIGHT_TABS = [
 export default function App() {
   const [rightTab, setRightTab] = useState('code');
   const [saveStatus, setSaveStatus] = useState(null);
+  const [lastRunAt, setLastRunAt] = useState(null);
   const canUndo = useFlowStore(selectCanUndo);
   const canRedo = useFlowStore(selectCanRedo);
   const flow = useFlowStore((s) => s.flow);
+  const savedIdRef = useRef(null);
   useUndoRedo();
 
   const handleSave = async () => {
     setSaveStatus('saving');
     try {
-      await flowApi.save(flow);
+      let result;
+      if (savedIdRef.current) {
+        result = await flowApi.update(savedIdRef.current, flow);
+      } else {
+        result = await flowApi.save(flow);
+        savedIdRef.current = result.id;
+      }
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus(null), 2000);
     } catch {
       setSaveStatus('error');
       setTimeout(() => setSaveStatus(null), 3000);
     }
+  };
+
+  const handleReset = () => {
+    savedIdRef.current = null;
+    useFlowStore.getState().resetFlow();
   };
 
   return (
@@ -51,7 +64,7 @@ export default function App() {
           >
             {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved ✓' : saveStatus === 'error' ? 'Error ✗' : 'Save Flow'}
           </button>
-          <button className="reset-btn" onClick={() => useFlowStore.getState().resetFlow()}>Reset</button>
+          <button className="reset-btn" onClick={handleReset}>Reset</button>
         </div>
       </header>
 
@@ -74,8 +87,8 @@ export default function App() {
             </div>
             <div className="tab-content">
               {rightTab === 'code'      && <CodePanel />}
-              {rightTab === 'run'       && <ExecutionPanel />}
-              {rightTab === 'history'   && <HistoryPanel />}
+              {rightTab === 'run'       && <ExecutionPanel onRunComplete={() => setLastRunAt(Date.now())} />}
+              {rightTab === 'history'   && <HistoryPanel lastRunAt={lastRunAt} />}
               {rightTab === 'analytics' && <AnalyticsPanel />}
             </div>
           </div>

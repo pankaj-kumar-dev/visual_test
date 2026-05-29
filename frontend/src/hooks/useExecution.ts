@@ -18,13 +18,15 @@ export interface UseExecutionActions {
   clear(): void;
 }
 
-export function useExecution(): UseExecutionState & UseExecutionActions {
+export function useExecution({ onComplete }: { onComplete?: () => void } = {}): UseExecutionState & UseExecutionActions {
   const [execution, setExecution] = useState<Execution | null>(null);
   const [status, setStatus] = useState<ExecutionStatus | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [stepResults, setStepResults] = useState<StepResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   const cleanup = useCallback(() => {
     cleanupRef.current?.();
@@ -54,8 +56,14 @@ export function useExecution(): UseExecutionState & UseExecutionActions {
           setStatus(final.status);
           setLogs(final.logs);
           setStepResults(final.stepResults);
+          onCompleteRef.current?.();
         },
-        onError: () => setError('Connection to backend lost'),
+        onError: (e) => {
+          const es = e.target as EventSource;
+          if (es.readyState === EventSource.CLOSED) {
+            setError('Connection to backend lost');
+          }
+        },
       });
       cleanupRef.current = stop;
     } catch (err) {

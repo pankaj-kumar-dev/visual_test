@@ -22,9 +22,9 @@ function StepRow({ result }) {
   );
 }
 
-export default function ExecutionPanel() {
+export default function ExecutionPanel({ onRunComplete }) {
   const flow = useFlowStore((s) => s.flow);
-  const { status, logs, stepResults, running, error, execution, run, cancel, clear } = useExecution();
+  const { status, logs, stepResults, running, error, execution, run, cancel, clear } = useExecution({ onComplete: onRunComplete });
 
   const hasRunnableTests = Object.values(flow.nodes ?? {}).some(
     (n) => n.kind === 'test' && n.steps.length > 0 && !n.skip,
@@ -84,8 +84,8 @@ export default function ExecutionPanel() {
 
       {stepResults.length > 0 && (
         <div className="exec-steps">
-          {stepResults.map((r) => (
-            <StepRow key={r.nodeId + r.label} result={r} />
+          {stepResults.map((r, i) => (
+            <StepRow key={`${r.nodeId}-${i}`} result={r} />
           ))}
         </div>
       )}

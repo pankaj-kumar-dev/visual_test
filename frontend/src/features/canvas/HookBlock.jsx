@@ -55,6 +55,10 @@ export default function HookBlock({ hookId }) {
             ))}
           </SortableContext>
 
+          {hook.steps.length === 0 && (
+            <div className="test-empty">No steps yet — add one below</div>
+          )}
+
           <div className="add-step-row">
             {rootCmds.map((def) => (
               <button

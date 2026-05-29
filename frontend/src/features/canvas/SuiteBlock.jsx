@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useFlowStore } from '../../core/state/useFlowStore.ts';
 import TestBlock from './TestBlock.jsx';
 import HookBlock from './HookBlock.jsx';
@@ -16,6 +16,18 @@ export default function SuiteBlock({ suiteId, depth = 0 }) {
   const [editing, setEditing] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [hookMenuOpen, setHookMenuOpen] = useState(false);
+  const hookMenuRef = useRef(null);
+
+  useEffect(() => {
+    if (!hookMenuOpen) return;
+    const handler = (e) => {
+      if (hookMenuRef.current && !hookMenuRef.current.contains(e.target)) {
+        setHookMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [hookMenuOpen]);
 
   if (!suite || suite.kind !== 'suite') return null;
 
@@ -67,7 +79,7 @@ export default function SuiteBlock({ suiteId, depth = 0 }) {
         <div className="suite-actions" onClick={(e) => e.stopPropagation()}>
           <button className="suite-action-btn" title="Add test" onClick={() => addTest('New test', suiteId)}>+ it</button>
           <button className="suite-action-btn" title="Add nested describe" onClick={() => addSuite('New suite', suiteId)}>+ describe</button>
-          <div className="hook-menu-wrap">
+          <div className="hook-menu-wrap" ref={hookMenuRef}>
             <button className="suite-action-btn" title="Add lifecycle hook" onClick={() => setHookMenuOpen((o) => !o)}>+ hook</button>
             {hookMenuOpen && (
               <div className="hook-menu">
