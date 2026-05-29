@@ -1,0 +1,33 @@
+services:
+  # ── Backend API ────────────────────────────────────────────────────────────
+  - type: web
+    name: vtb-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: RUNNER
+        value: mock
+      - key: MOCK_FAILURE_RATE
+        value: 0
+      - key: FRONTEND_ORIGIN
+        sync: false   # set manually in Render dashboard to your frontend URL
+
+  # ── Frontend static site ───────────────────────────────────────────────────
+  - type: web
+    name: vtb-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false   # set manually in Render dashboard to your backend URL
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
