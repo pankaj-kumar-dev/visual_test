@@ -6,11 +6,13 @@ backend/data/*.json
 .env.local
 *.local
 .ai/
-interview-prep/
 private-notes/
 prep/
 ai-notes/
-INTERVIEW_GUIDE.md
+
+# Retired design-agent tooling (token/rule refs archived to docs/design/)
+design_agent/
+**/.design/
 # Editor
 .vscode/
 .idea/

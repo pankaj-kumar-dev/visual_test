@@ -1,6 +1,7 @@
-# UI RULES
-> Hard DO/DON'T pairs. Distilled from every other file in this system.
-> No exceptions without a logged entry in DESIGN_DECISIONS.md.
+# UI RULES (archived reference)
+> **Archived** from the retired `design_agent/.design/` framework. Kept because these rules are
+> reflected in `frontend/src/styles.css` (semantic utility classes, focus-visible rings).
+> Hard DO/DON'T pairs. Reference only — the live source of truth is `frontend/src/styles.css`.
 
 ---
 
@@ -265,7 +266,7 @@ Remove immediately if found:
 - Don't add emoji to error messages or functional status text (ok in status badges like ✓ only)
 - Don't inflate font size to 16px base — 13px is correct and intentional for this tool
 - Don't add consumer-oriented features (onboarding wizard, guided tours, mascot) without
-  explicit product pivot logged in DESIGN_DECISIONS.md
+  an explicit, documented product pivot
 - Don't add a second accent color — hook lifecycle colors (blue-tint, amber) are semantic,
   not brand accents
 

@@ -1,16 +1,17 @@
-# DESIGN SYSTEM
-> Tokens, scales, and semantic mappings. The source of truth for all design values.
-> Reasoning lives in VISUAL_LANGUAGE.md. This file is values only.
+# DESIGN SYSTEM (archived reference)
+> **Archived** from the retired `design_agent/.design/` framework. Kept because these token
+> values are reflected in `frontend/src/styles.css`. The live source of truth is the CSS
+> custom properties in `frontend/src/styles.css`; this file is reference/rationale only.
+> Tokens, scales, and semantic mappings.
 
 ---
 
 ## HOW TO USE THIS FILE
 
-1. Populate token values after completing VISUAL_LANGUAGE.md ✓
-2. Map every token to a CSS custom property (no Tailwind — this project uses raw CSS)
-3. Semantic tokens map to primitive tokens
-4. Never use primitive tokens in components — always use semantic tokens
-5. When adding a new token: add primitive first, then semantic layer, then document in DESIGN_DECISIONS.md
+1. These values live as CSS custom properties in `frontend/src/styles.css` (no Tailwind — raw CSS)
+2. Semantic tokens map to primitive tokens
+3. Never use primitive tokens in components — always use semantic tokens
+4. When adding a token: add primitive first, then semantic layer, then update `frontend/src/styles.css`
 
 ---
 
