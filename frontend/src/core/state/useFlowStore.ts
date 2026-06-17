@@ -11,6 +11,8 @@ import {
   removeCommandAtPath,
 } from '../model/treeSchema.ts';
 import { parseFlow } from '../model/flowSchema.ts';
+import { commandRegistry } from '../registry/commandRegistry.ts';
+import '../registry/builtinCommands.ts';
 import type {
   ArgNode,
   CommandNode,
@@ -278,7 +280,8 @@ export const useFlowStore = create<FlowStore>((set, get) => ({
   // ── Step ─────────────────────────────────────────────────────────────────
 
   addStep(targetId, commandName = 'get', afterIndex) {
-    const step = createStep(commandName);
+    const def = commandRegistry.get(commandName);
+    const step = createStep(commandName, def?.defaultArgs() ?? []);
     mutate(get, set, (flow) => {
       const node = flow.nodes[targetId];
       if (!node || (node.kind !== 'test' && node.kind !== 'hook')) return {};

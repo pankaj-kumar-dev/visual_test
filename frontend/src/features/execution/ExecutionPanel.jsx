@@ -1,13 +1,6 @@
 import { useFlowStore } from '../../core/state/useFlowStore.ts';
 import { useExecution } from '../../hooks/useExecution.ts';
-
-const STATUS_COLOR = {
-  queued:    '#8a93a6',
-  running:   '#4f8cff',
-  passed:    '#4ade80',
-  failed:    '#ef4444',
-  cancelled: '#8a93a6',
-};
+import { useFlowValidation } from '../../hooks/useFlowValidation.ts';
 
 const STATUS_LABEL = {
   queued:    '⏳ Queued',
@@ -18,11 +11,11 @@ const STATUS_LABEL = {
 };
 
 function StepRow({ result }) {
-  const icon  = result.status === 'passed' ? '✓' : result.status === 'failed' ? '✗' : '–';
-  const color = result.status === 'passed' ? '#4ade80' : result.status === 'failed' ? '#ef4444' : '#8a93a6';
+  const icon   = result.status === 'passed' ? '✓' : result.status === 'failed' ? '✗' : '–';
+  const iconCls = result.status === 'passed' ? 'text-success' : result.status === 'failed' ? 'text-danger' : 'text-muted';
   return (
     <div className="exec-step">
-      <span className="exec-step-icon" style={{ color }}>{icon}</span>
+      <span className={`exec-step-icon ${iconCls}`}>{icon}</span>
       <span className="exec-step-label">{result.label}</span>
       <span className="exec-step-dur">{result.durationMs}ms</span>
       {result.error && <span className="exec-step-error">{result.error}</span>}
@@ -30,19 +23,20 @@ function StepRow({ result }) {
   );
 }
 
-export default function ExecutionPanel() {
+export default function ExecutionPanel({ onRunComplete }) {
   const flow = useFlowStore((s) => s.flow);
-  const { status, logs, stepResults, running, error, execution, run, cancel, clear } = useExecution();
+  const { status, logs, stepResults, running, error, execution, run, cancel, clear } = useExecution({ onComplete: onRunComplete });
 
-  // v2: flow is runnable when at least one test has at least one step
+  const { errorCount } = useFlowValidation();
+
   const hasRunnableTests = Object.values(flow.nodes ?? {}).some(
     (n) => n.kind === 'test' && n.steps.length > 0 && !n.skip,
   );
-  const canRun = hasRunnableTests && !running;
+  const canRun = hasRunnableTests && !running && errorCount === 0;
 
-  const passedCount  = stepResults.filter((s) => s.status === 'passed').length;
-  const failedCount  = stepResults.filter((s) => s.status === 'failed').length;
-  const totalCount   = stepResults.length;
+  const passedCount = stepResults.filter((s) => s.status === 'passed').length;
+  const failedCount = stepResults.filter((s) => s.status === 'failed').length;
+  const totalCount  = stepResults.length;
 
   return (
     <section className="exec-panel">
@@ -50,7 +44,11 @@ export default function ExecutionPanel() {
         <h3 className="panel-title">Run</h3>
         <div className="exec-actions">
           {status && (
-            <span className="exec-status-badge" style={{ color: STATUS_COLOR[status] ?? '#8a93a6' }}>
+            <span
+              className={`exec-status-badge status-${status}`}
+              aria-live="assertive"
+              aria-atomic="true"
+            >
               {STATUS_LABEL[status] ?? status}
             </span>
           )}
@@ -60,7 +58,13 @@ export default function ExecutionPanel() {
             className="run-btn"
             disabled={!canRun}
             onClick={() => run(flow)}
-            title={!hasRunnableTests ? 'Add at least one test with steps first' : ''}
+            title={
+              !hasRunnableTests
+                ? 'Add at least one test with steps first'
+                : errorCount > 0
+                  ? `Fix ${errorCount} validation error${errorCount !== 1 ? 's' : ''} before running`
+                  : ''
+            }
           >
             {running ? 'Running…' : 'Run Test'}
           </button>
@@ -69,7 +73,13 @@ export default function ExecutionPanel() {
 
       {error && <div className="exec-error">{error}</div>}
 
-      {!status && !error && (
+      {!status && !error && errorCount > 0 && hasRunnableTests && (
+        <p className="panel-hint">
+          ⚠ {errorCount} validation error{errorCount !== 1 ? 's' : ''} — fix them in the Code panel before running.
+        </p>
+      )}
+
+      {!status && !error && errorCount === 0 && (
         <p className="panel-hint">
           {hasRunnableTests
             ? `${Object.values(flow.nodes).filter(n => n.kind === 'test' && !n.skip).length} test(s) ready — click Run Test.`
@@ -77,29 +87,26 @@ export default function ExecutionPanel() {
         </p>
       )}
 
-      {/* Summary bar */}
       {totalCount > 0 && (
         <div className="exec-summary">
-          <span style={{ color: '#4ade80' }}>✓ {passedCount} passed</span>
-          {failedCount > 0 && <span style={{ color: '#ef4444' }}>  ✗ {failedCount} failed</span>}
+          <span className="exec-summary-passed">✓ {passedCount} passed</span>
+          {failedCount > 0 && <span className="exec-summary-failed">✗ {failedCount} failed</span>}
           {execution?.durationMs != null && (
             <span className="exec-summary-dur"> · {execution.durationMs}ms</span>
           )}
         </div>
       )}
 
-      {/* Step results — live-updated via SSE */}
       {stepResults.length > 0 && (
         <div className="exec-steps">
-          {stepResults.map((r) => (
-            <StepRow key={r.nodeId + r.label} result={r} />
+          {stepResults.map((r, i) => (
+            <StepRow key={`${r.nodeId}-${i}`} result={r} />
           ))}
         </div>
       )}
 
-      {/* Live log stream */}
       {logs.length > 0 && (
-        <div className="exec-log">
+        <div className="exec-log" aria-live="polite" aria-label="Execution log">
           {logs.map((entry, i) => (
             <div key={i} className={`exec-log-line level-${entry.level}`}>
               <span className="exec-log-time">

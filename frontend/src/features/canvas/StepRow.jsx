@@ -97,7 +97,7 @@ export default function StepRow({ step, nodeId, index, errors }) {
       className={`step-row ${isSelected ? 'selected' : ''} ${hasError ? 'has-error' : ''} ${hasWarn ? 'has-warn' : ''} ${step.disabled ? 'disabled' : ''}`}
       onClick={() => setSelection({ kind: 'step', nodeId, stepId: step.id })}
     >
-      <span className="step-drag-handle" {...attributes} {...listeners} title="Drag to reorder">⠿</span>
+      <span className="step-drag-handle" {...attributes} {...listeners} title="Drag to reorder" aria-hidden="true">⠿</span>
       <span className="step-index">{index + 1}</span>
       <span className="step-root-label">{describeCommand(step.command)}</span>
       <span className="step-chain">
@@ -115,6 +115,7 @@ export default function StepRow({ step, nodeId, index, errors }) {
         className="step-remove"
         onClick={(e) => { e.stopPropagation(); removeStep(nodeId, step.id); }}
         title="Remove step"
+        aria-label="Remove step"
       >
         ×
       </button>

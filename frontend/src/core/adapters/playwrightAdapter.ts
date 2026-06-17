@@ -27,8 +27,6 @@ export function selectorToLocatorMethod(sel: SelectorNode): string {
     }
     case 'css':
       return `locator(${dq(sel.value)})`;
-    case 'xpath':
-      return `locator(${dq(`xpath=${sel.value}`)})`;
   }
 }
 

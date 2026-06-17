@@ -41,11 +41,13 @@ export default function Canvas() {
           className="flow-name"
           value={flow.name}
           placeholder="Flow name"
+          aria-label="Flow name"
           onChange={(e) => useFlowStore.getState().setFlowMeta({ name: e.target.value })}
         />
         <input
           className="flow-baseurl"
           placeholder="baseUrl"
+          aria-label="Base URL"
           value={flow.baseUrl}
           onChange={(e) => useFlowStore.getState().setFlowMeta({ baseUrl: e.target.value })}
         />
@@ -73,8 +75,12 @@ export default function Canvas() {
           className="flow-target"
           defaultValue=""
           onChange={(e) => {
-            if (e.target.value === 'login')  useFlowStore.getState().loadFlow(loginFlow);
-            if (e.target.value === 'tasks')  useFlowStore.getState().loadFlow(tasksFlow);
+            try {
+              if (e.target.value === 'login')  useFlowStore.getState().loadFlow(loginFlow);
+              if (e.target.value === 'tasks')  useFlowStore.getState().loadFlow(tasksFlow);
+            } catch {
+              window.alert('Could not load the example flow.');
+            }
             e.target.value = '';
           }}
           title="Load example flow"
@@ -90,7 +96,7 @@ export default function Canvas() {
           {rootSuite ? (
             <SuiteBlock suiteId={rootSuite.id} depth={0} />
           ) : (
-            <div className="canvas-empty-msg">Flow has no root suite.</div>
+            <div className="canvas-empty-msg">Select a test or hook, then click a command in the left panel to add steps — or load an example above.</div>
           )}
         </div>
       </DndContext>

@@ -14,8 +14,17 @@ import type {
 
 // ─── Escape helper ────────────────────────────────────────────────────────────
 
+// Safe JS string literal. JSON.stringify escapes quotes, backslashes, newlines,
+// carriage returns, tabs and other control chars and emits a valid double-quoted
+// string. U+2028 / U+2029 are legal in JSON but are line terminators in JS, so
+// they must be escaped separately. Built with the RegExp constructor + charCodeAt
+// so no raw separator character ever appears in this source file.
+const LINE_SEPARATORS = new RegExp('[\\u2028\\u2029]', 'g');
+
 function sq(s: string): string {
-  return `'${s.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+  return JSON.stringify(s).replace(LINE_SEPARATORS, (c) =>
+    c.charCodeAt(0) === 0x2028 ? '\\u2028' : '\\u2029',
+  );
 }
 
 function jq(s: string): string {

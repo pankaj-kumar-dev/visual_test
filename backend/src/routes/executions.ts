@@ -101,15 +101,21 @@ executionsRouter.get('/:id/events', (req, res) => {
     res.write(`data: ${JSON.stringify({ event: 'step-result', data: step })}\n\n`);
   }
 
+  const heartbeat = setInterval(() => {
+    res.write(': ping\n\n');
+  }, 25000);
+
   const unsubscribe = subscribeSse(id, (payload) => {
     res.write(`data: ${JSON.stringify(payload)}\n\n`);
     if (payload.event === 'complete') {
+      clearInterval(heartbeat);
       res.end();
       unsubscribe();
     }
   });
 
   req.on('close', () => {
+    clearInterval(heartbeat);
     unsubscribe();
   });
 });

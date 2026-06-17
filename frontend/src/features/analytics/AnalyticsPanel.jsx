@@ -3,20 +3,20 @@ import { analyticsApi } from '../../services/analyticsApi.ts';
 
 function PassRateBar({ rate }) {
   const pct = Math.round(rate * 100);
-  const color = pct >= 80 ? '#4ade80' : pct >= 50 ? '#facc15' : '#ef4444';
+  const cls = pct >= 80 ? 'rate-high' : pct >= 50 ? 'rate-medium' : 'rate-low';
   return (
     <div className="rate-bar-wrap">
       <div className="rate-bar-track">
-        <div className="rate-bar-fill" style={{ width: `${pct}%`, background: color }} />
+        <div className={`rate-bar-fill ${cls}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="rate-bar-label" style={{ color }}>{pct}%</span>
+      <span className={`rate-bar-label ${cls}`}>{pct}%</span>
     </div>
   );
 }
 
 function FlakyRow({ stat }) {
-  const pct = Math.round(stat.flakeRate * 100);
-  const color = stat.isFlaky ? '#facc15' : stat.flakeRate > 0.85 ? '#ef4444' : '#4ade80';
+  const pct    = Math.round(stat.flakeRate * 100);
+  const pctCls = stat.isFlaky ? 'text-warn' : stat.flakeRate > 0.85 ? 'text-danger' : 'text-success';
   return (
     <div className={`flaky-row ${stat.isFlaky ? 'is-flaky' : ''}`}>
       <div className="flaky-info">
@@ -24,9 +24,24 @@ function FlakyRow({ stat }) {
         <span className="flaky-type">{stat.nodeType}</span>
       </div>
       <div className="flaky-stats">
-        <span style={{ color }}>{pct}% fail</span>
+        <span className={pctCls}>{pct}% fail</span>
         <span className="flaky-runs">{stat.totalRuns} runs</span>
         {stat.isFlaky && <span className="flaky-badge">FLAKY</span>}
+      </div>
+    </div>
+  );
+}
+
+function SkeletonStats() {
+  return (
+    <div className="analytics-stats">
+      {[0,1,2,3].map(i => (
+        <div key={i} className="astat">
+          <span className="skeleton skeleton-card" style={{ height: '44px' }} />
+        </div>
+      ))}
+      <div className="astat astat-wide">
+        <span className="skeleton" style={{ height: '20px', display: 'block' }} />
       </div>
     </div>
   );
@@ -63,20 +78,34 @@ export default function AnalyticsPanel() {
         </button>
       </header>
 
-      {error && <div className="exec-error">{error}</div>}
+      {loading && !stats && <SkeletonStats />}
 
-      {stats && (
+      {error && (
+        <div className="panel-empty">
+          <p className="panel-empty-title">Could not load analytics</p>
+          <p className="panel-empty-desc">{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && stats?.totalExecutions === 0 && (
+        <div className="panel-empty">
+          <p className="panel-empty-title">No runs yet</p>
+          <p className="panel-empty-desc">Run a test to start collecting analytics data.</p>
+        </div>
+      )}
+
+      {stats && stats.totalExecutions > 0 && (
         <div className="analytics-stats">
           <div className="astat">
             <span className="astat-val">{stats.totalExecutions}</span>
             <span className="astat-label">total runs</span>
           </div>
           <div className="astat">
-            <span className="astat-val" style={{ color: '#4ade80' }}>{stats.passed}</span>
+            <span className="astat-val text-success">{stats.passed}</span>
             <span className="astat-label">passed</span>
           </div>
           <div className="astat">
-            <span className="astat-val" style={{ color: '#ef4444' }}>{stats.failed}</span>
+            <span className="astat-val text-danger">{stats.failed}</span>
             <span className="astat-label">failed</span>
           </div>
           <div className="astat">
@@ -104,10 +133,6 @@ export default function AnalyticsPanel() {
             {flaky.map(stat => <FlakyRow key={stat.nodeId} stat={stat} />)}
           </div>
         </div>
-      )}
-
-      {!loading && stats?.totalExecutions === 0 && (
-        <p className="panel-hint">Run tests to see analytics.</p>
       )}
 
       {!loading && stats && stats.totalExecutions > 0 && flaky.length === 0 && (

@@ -37,13 +37,19 @@ export default function CodePanel() {
 
   const runImport = () => {
     setImportError('');
+    let raw;
     try {
-      const raw = JSON.parse(importText);
+      raw = JSON.parse(importText);
+    } catch {
+      setImportError('Invalid JSON — check the text for syntax errors (missing quotes, commas, brackets).');
+      return;
+    }
+    try {
       useFlowStore.getState().loadFlow(raw);
       setImportMode(null);
       setImportText('');
-    } catch (e) {
-      setImportError(e.message);
+    } catch {
+      setImportError('Could not load flow — the JSON is not a valid v1 or v2 flow. Your current work is unchanged.');
     }
   };
 

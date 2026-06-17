@@ -1,5 +1,6 @@
 import type { Flow } from '../core/types.ts';
 import { generate } from '../core/codegen/generate.ts';
+import { validateFlow } from '../core/validation/validateFlow.ts';
 
 const BASE = import.meta.env['VITE_API_URL'] ?? 'http://localhost:3001';
 
@@ -64,6 +65,14 @@ export const executionApi = {
    *  Includes pre-generated specCode so CypressRunner can write it to a temp file
    *  without needing codegen logic in the backend. */
   run(flow: Flow): Promise<Execution> {
+    // Hard gate: never execute a flow that fails validation.
+    const validation = validateFlow(flow);
+    if (!validation.valid) {
+      const n = validation.errors.filter((e) => e.severity === 'error').length;
+      return Promise.reject(
+        new Error(`Cannot run: ${n} validation error${n !== 1 ? 's' : ''} — fix them before running.`),
+      );
+    }
     let specCode: string | undefined;
     try { specCode = generate(flow); } catch { /* empty flow — no code */ }
     return request<Execution>('/api/executions', {
