@@ -4,7 +4,7 @@ import type { SelectorNode, SelectorStrategy } from '../types.ts';
 // ─── Zod schema ───────────────────────────────────────────────────────────────
 
 export const SelectorStrategySchema = z.enum([
-  'testId', 'role', 'label', 'placeholder', 'text', 'css', 'xpath',
+  'testId', 'role', 'label', 'placeholder', 'text', 'css',
 ]);
 
 export const SelectorNodeSchema = z.object({
@@ -40,7 +40,6 @@ export function displaySelector(sel: SelectorNode): string {
     case 'placeholder': return `placeholder:${sel.value}`;
     case 'text':        return `text:${sel.value}`;
     case 'css':         return sel.value;
-    case 'xpath':       return `xpath:${sel.value}`;
   }
 }
 
@@ -51,5 +50,4 @@ export const SELECTOR_STRATEGY_LABELS: Record<SelectorStrategy, string> = {
   placeholder: 'Placeholder',
   text:        'Text',
   css:         'CSS',
-  xpath:       'XPath',
 };

@@ -10,8 +10,7 @@ export type SelectorStrategy =
   | 'label'         // by <label> text
   | 'placeholder'   // by placeholder attribute
   | 'text'          // by visible text content
-  | 'css'           // raw CSS selector (escape hatch)
-  | 'xpath';        // XPath (last resort)
+  | 'css';          // raw CSS selector (escape hatch)
 
 export interface SelectorNode {
   strategy: SelectorStrategy;

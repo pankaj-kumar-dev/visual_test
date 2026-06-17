@@ -4,7 +4,7 @@ import type { ArgNode, AssertionKind, CommandDefinition, SelectorStrategy } from
 // ─── Arg helpers ──────────────────────────────────────────────────────────────
 
 const ALL_STRATEGIES: SelectorStrategy[] = [
-  'testId', 'role', 'label', 'placeholder', 'text', 'css', 'xpath',
+  'testId', 'role', 'label', 'placeholder', 'text', 'css',
 ];
 
 const SELECTOR_ARG = (strategies = ALL_STRATEGIES) => ({

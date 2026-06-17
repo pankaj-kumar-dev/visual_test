@@ -75,8 +75,12 @@ export default function Canvas() {
           className="flow-target"
           defaultValue=""
           onChange={(e) => {
-            if (e.target.value === 'login')  useFlowStore.getState().loadFlow(loginFlow);
-            if (e.target.value === 'tasks')  useFlowStore.getState().loadFlow(tasksFlow);
+            try {
+              if (e.target.value === 'login')  useFlowStore.getState().loadFlow(loginFlow);
+              if (e.target.value === 'tasks')  useFlowStore.getState().loadFlow(tasksFlow);
+            } catch {
+              window.alert('Could not load the example flow.');
+            }
             e.target.value = '';
           }}
           title="Load example flow"

@@ -1,5 +1,6 @@
 import { useFlowStore } from '../../core/state/useFlowStore.ts';
 import { useExecution } from '../../hooks/useExecution.ts';
+import { useFlowValidation } from '../../hooks/useFlowValidation.ts';
 
 const STATUS_LABEL = {
   queued:    '⏳ Queued',
@@ -26,10 +27,12 @@ export default function ExecutionPanel({ onRunComplete }) {
   const flow = useFlowStore((s) => s.flow);
   const { status, logs, stepResults, running, error, execution, run, cancel, clear } = useExecution({ onComplete: onRunComplete });
 
+  const { errorCount } = useFlowValidation();
+
   const hasRunnableTests = Object.values(flow.nodes ?? {}).some(
     (n) => n.kind === 'test' && n.steps.length > 0 && !n.skip,
   );
-  const canRun = hasRunnableTests && !running;
+  const canRun = hasRunnableTests && !running && errorCount === 0;
 
   const passedCount = stepResults.filter((s) => s.status === 'passed').length;
   const failedCount = stepResults.filter((s) => s.status === 'failed').length;
@@ -55,7 +58,13 @@ export default function ExecutionPanel({ onRunComplete }) {
             className="run-btn"
             disabled={!canRun}
             onClick={() => run(flow)}
-            title={!hasRunnableTests ? 'Add at least one test with steps first' : ''}
+            title={
+              !hasRunnableTests
+                ? 'Add at least one test with steps first'
+                : errorCount > 0
+                  ? `Fix ${errorCount} validation error${errorCount !== 1 ? 's' : ''} before running`
+                  : ''
+            }
           >
             {running ? 'Running…' : 'Run Test'}
           </button>
@@ -64,7 +73,13 @@ export default function ExecutionPanel({ onRunComplete }) {
 
       {error && <div className="exec-error">{error}</div>}
 
-      {!status && !error && (
+      {!status && !error && errorCount > 0 && hasRunnableTests && (
+        <p className="panel-hint">
+          ⚠ {errorCount} validation error{errorCount !== 1 ? 's' : ''} — fix them in the Code panel before running.
+        </p>
+      )}
+
+      {!status && !error && errorCount === 0 && (
         <p className="panel-hint">
           {hasRunnableTests
             ? `${Object.values(flow.nodes).filter(n => n.kind === 'test' && !n.skip).length} test(s) ready — click Run Test.`

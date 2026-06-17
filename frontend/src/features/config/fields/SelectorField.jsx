@@ -82,7 +82,6 @@ function placeholderFor(strategy) {
     case 'placeholder': return 'Enter email';
     case 'text':        return 'Sign in';
     case 'css':         return '.submit-btn';
-    case 'xpath':       return '//button[@type="submit"]';
     default:            return '';
   }
 }

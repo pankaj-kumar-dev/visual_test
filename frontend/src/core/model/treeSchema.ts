@@ -154,20 +154,6 @@ export function createCommand(name: string, args: ArgNode[] = []): CommandNode {
 
 // ─── Command path helpers ─────────────────────────────────────────────────────
 
-/** Resolve command at path [] = root, [0] = chain[0], [0,1] = chain[0].chain[1] */
-export function getCommandAtPath(
-  root: CommandNode,
-  path: number[],
-): CommandNode | null {
-  let curr: CommandNode = root;
-  for (const idx of path) {
-    const next = curr.chain[idx];
-    if (!next) return null;
-    curr = next;
-  }
-  return curr;
-}
-
 /** Immutably update command at path, returns new root */
 export function patchCommandAtPath(
   root: CommandNode,
